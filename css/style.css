@@ -1,0 +1,51 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    user-select: none;
+}
+body {
+    margin-top: 100px;
+}
+.piano {
+    display: flex;
+
+    & .key {
+        margin: 0 2px;
+        padding-bottom: 10px;
+
+        border: 1px solid;
+        width: 30px;
+        height: 200px;
+        cursor: pointer;
+
+        display: flex;
+        justify-content: center;
+        align-items: end;
+        font-weight: bold;
+        font-size: 12px;
+    }
+
+    & .white {
+        background-color: white;
+        z-index: 1;
+    }
+
+    & .black {
+        background-color: black!important;
+        color: white;
+        height: 140px;
+        width: 30px;
+        position: relative;
+        margin-left: -15px;
+        margin-right: -15px;
+        z-index: 2;
+    }
+    
+    & .active {
+        filter: invert(1);
+    }
+    & .selected {
+        background-color: yellow;
+    }
+}

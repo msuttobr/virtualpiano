@@ -1,13 +1,13 @@
-# msuttobr.github.io
+# Virtual Piano
 Um piano virtual interativo feito para tocar direto no seu navegador. Este projeto é ideal para iniciantes, oferecendo uma experiência prática de aprender e praticar acordes e melodias sem precisar de um instrumento físico.
 
 📦 Instalação
 Clone o repositório:
-git clone https://github.com/msuttobr/msuttobr.github.io.git
+git clone https://github.com/msuttobr/virtualpiano.git
 Use um servidor local para visualizar a aplicação.
 
 🎹 Como Usar
-Teclado: Utilize as teclas de E a O para tocar as notas da primeira oitava e as teclas C a . para a segunda oitava, altere as oitavas com Q, W, P, ´
+Teclado: Utilize as teclas de Z a ; para tocar as notas da primeira oitava e as teclas Q a ´ para a segunda oitava, altere as oitavas com Tab, CapsLock, ShiftLeft, ControlLeft
 Mouse: Clique nas teclas do piano virtual para tocar as notas.
 
 💡 Funcionalidades

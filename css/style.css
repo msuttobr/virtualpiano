@@ -4,17 +4,36 @@
     box-sizing: border-box;
     user-select: none;
 }
+
 body {
-    margin-top: 100px;
+    background-color: #282828;
 }
+
+.container {
+    margin: 0 auto;
+    padding: 0 20px;
+    max-width: 1140px;
+}
+
+.description {
+    display: inline-block;
+    margin: 50px 0 20px 0;
+    padding: 10px;
+    background-color: hsl(0, 0%, 100%);
+
+    & kbd {
+        font-size: 16px;
+    }
+}
+
 .piano {
     display: flex;
 
     & .key {
-        margin: 0 2px;
         padding-bottom: 10px;
 
         border: 1px solid;
+        border-top: none;
         width: 30px;
         height: 200px;
         cursor: pointer;
@@ -24,6 +43,8 @@ body {
         align-items: end;
         font-weight: bold;
         font-size: 12px;
+
+        filter: brightness(0.3);
     }
 
     & .white {
@@ -32,7 +53,7 @@ body {
     }
 
     & .black {
-        background-color: black!important;
+        background-color: black;
         color: white;
         height: 140px;
         width: 30px;
@@ -41,11 +62,12 @@ body {
         margin-right: -15px;
         z-index: 2;
     }
-    
-    & .active {
-        filter: invert(1);
-    }
+
     & .selected {
-        background-color: yellow;
+        filter: brightness(1) drop-shadow(2px 4px 6px black);
+    }
+
+    & .active {
+        background-color: hsl(0 0% 65% / 1);
     }
 }

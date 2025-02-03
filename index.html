@@ -1,48 +1,75 @@
 <!DOCTYPE html>
 <html lang="pt-br">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="description"
+            content="Toque suas músicas favoritas com o Piano Virtual. Uma experiência de piano online completa.">
+        <title>Piano Virtual</title>
+        <link rel="stylesheet" href="css/style.css">
+    </head>
+    <body>
+        <div class="container">
+            <div class="description">
+                Utilize <kbd>Tab</kbd> para primeira oitava<br>
+                Utilize <kbd>CapsLock</kbd> para última oitava<br>
+                Utilize <kbd>ShiftLeft</kbd> para recuar a oitava<br>
+                Utilize <kbd>ControlLeft</kbd> para avançar a oitava
+            </div>
+            <div class="piano"></div>
+        </div>
+        <script type="module">
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Piano Virtual</title>
-    <link rel="stylesheet" href="css/style.css?v=5.5">
-</head>
-
-<body>
-    <span>Selecionado: </span>
-    <div class="piano"></div>
-
-<script type="module">
 import { notesSound } from './soundfonts/acoustic_grand_piano_trimmed-ogg.js'
 
 const keys = [
-    "E", "4", "R", "5", "T", "Y", "7", "U", "8", "I", "9", "O",
-    "C", "F", "V", "G", "B", "N", "J", "M", "K", ",", "l", ".",
+    "Z", "S", "X", "D", "C", "V", "G", "B", "H", "N", "J", "M", ",", "L", ".", "Ç", ";",
+    "Q", "2", "W", "3", "E", "4", "R", "T", "6", "Y", "7", "U", "I", "9", "O", "0", "P", "-", 'DEAD'
 ];
 
-const notes = [
-    "C2", "Db2", "D2", "Eb2", "E2", "F2", "Gb2", "G2", "Ab2", "A2", "Bb2", "B2",
-    "C3", "Db3", "D3", "Eb3", "E3", "F3", "Gb3", "G3", "Ab3", "A3", "Bb3", "B3",
-    "C4", "Db4", "D4", "Eb4", "E4", "F4", "Gb4", "G4", "Ab4", "A4", "Bb4", "B4",
-    "C5", "Db5", "D5", "Eb5", "E5", "F5", "Gb5", "G5", "Ab5", "A5", "Bb5", "B5",
-    "C6", "Db6", "D6", "Eb6", "E6", "F6", "Gb6", "G6", "Ab6", "A6", "Bb6", "B6",
-    /*"C7"*/
-];
+const notes = Object.keys(notesSound)
 
 const keysOffset = {
-    "KeyQ": 0,
-    "KeyW": -12,
-    "KeyP": 12,
-    "BracketLeft": -24
+    "Tab": -100,
+    "CapsLock": 100,
+    "ShiftLeft": -12,
+    "ControlLeft": 12
 }
 
 let selected = 0;
-let octave = 12;
 const final = notes.length;
-document.querySelector('span').innerText = `Selecionado: ${selected}`;
 
 const pianoElement = document.querySelector('.piano');
 let isMouseDown = false;
+
+function updateLabels(index) {
+    const labels = document.querySelectorAll('.key-label');
+
+    const keysButton = document.querySelectorAll('.key');
+    document.querySelectorAll('.selected').forEach(item => {
+        item.classList.remove('selected')
+    });
+
+    for (let i = 0; i < notes.length; i++) {
+        labels[i].innerText = notes[i];
+    }
+    
+    for (let i = 0; i < keys.length; i++) {
+        labels[index + i].innerText = keys[i] !== "DEAD" ? keys[i] : "´";
+        keysButton[index + i].classList.add('selected');
+    }
+}
+function playNote(note) {
+    const audio = new Audio(note);
+    audio.play();
+}
+function activateKey(note, key) {
+    playNote(notesSound[note]);
+    key.classList.add('active');
+}
+function deactivateKey(key) {
+    key.classList.remove('active');
+}
 
 notes.forEach(note => {
     const key = document.createElement('div');
@@ -64,11 +91,12 @@ notes.forEach(note => {
         activateKey(note, key);
     });
 
-    key.addEventListener('mouseup', (event) => {
+    key.addEventListener('mouseup', event => {
         isMouseDown = false;
+        deactivateKey(event.target)
     });
 
-    key.addEventListener('mousemove', (event) => {
+    key.addEventListener('mousemove', event => {
         if (isMouseDown && event.target === key) {
             if (!key.classList.contains('active')) {
                 activateKey(note, key);
@@ -76,7 +104,7 @@ notes.forEach(note => {
         }
     });
 
-    key.addEventListener('mouseleave', (event) => {
+    key.addEventListener('mouseleave', event => {
         deactivateKey(event.target);
     });
 
@@ -96,20 +124,13 @@ window.addEventListener('keydown', event => {
     }
     keyPressed = event.code;
     if (keysOffset[keyPressed] !== undefined) {
-        if (keyPressed === 'BracketLeft') {
-            selected = final - 24;
-        } else if (keyPressed === 'KeyQ') {
-            selected = 0;
-        } else {
-            selected += keysOffset[keyPressed];
-        }
+        selected += keysOffset[keyPressed];
         if (selected < 0) selected = 0;
-        else if (selected >= final - 24) {
-            selected = final - 24;
+        else if (selected > final - keys.length) {
+            selected = final - keys.length;
         }
 
         updateLabels(selected);
-        document.querySelector('span').innerText = `Selecionado: ${selected}`;
     }
 })
 window.addEventListener('keyup', event => {
@@ -125,33 +146,7 @@ window.addEventListener('keyup', event => {
     }
 });
 
-function playNote(note) {
-    const audio = new Audio(note);
-    audio.play();
-}
-function activateKey(note, key) {
-    playNote(notesSound[note]);
-    key.classList.add('active');
-}
-function deactivateKey(key) {
-    key.classList.remove('active');
-}
-function updateLabels(index) {
-    const labels = document.querySelectorAll('.key-label');
-    const keysButton = document.querySelectorAll('.key');
-    document.querySelectorAll('.selected').forEach(item => {
-        item.classList.remove('selected')
-    });
-    for (let i = 0; i < notes.length; i++) {
-        labels[i].innerText = notes[i];
-    }
-    for (let i = 0; i < (octave * 2); i++) {
-        labels[index + i].innerText = keys[i];
-        keysButton[index + i].classList.add('selected');
-    }
-}
 updateLabels(selected);
-</script>
-</body>
-
+        </script>
+    </body>
 </html>

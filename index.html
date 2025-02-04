@@ -9,26 +9,46 @@
         <link rel="stylesheet" href="css/style.css">
     </head>
     <body>
-        <div class="container">
-            <div class="description">
-                Utilize <kbd>Tab</kbd> para primeira oitava<br>
-                Utilize <kbd>CapsLock</kbd> para última oitava<br>
-                Utilize <kbd>ShiftLeft</kbd> para recuar a oitava<br>
-                Utilize <kbd>ControlLeft</kbd> para avançar a oitava
+        <section class="instruments">
+            <div class="container">
+                <div class="instruments-info">
+                    <div class="description">
+                        Utilize <kbd>Tab</kbd> para primeira oitava<br>
+                        Utilize <kbd>CapsLock</kbd> para última oitava<br>
+                        Utilize <kbd>ShiftLeft</kbd> para recuar a oitava<br>
+                        Utilize <kbd>ControlLeft</kbd> para avançar a oitava
+                    </div>
+                </div>
+                <div class="macro">
+                    <label><input type="checkbox" name="enable-macro">Enable Macro Record</label>
+                    <label><input type="checkbox" name="run-macro">Run Macro</label>
+                    <label><input type="checkbox" name="repeat-macro">Repeat Macro</label>
+                    <textarea name="macro-list" id=""></textarea>
+                </div>
+                <div class="piano"></div>
             </div>
-            <div class="piano"></div>
-        </div>
+        </section>
         <script type="module">
-
 import { notesSound } from './soundfonts/acoustic_grand_piano_trimmed-ogg.js'
+
+const macroElement = document.getElementsByName('enable-macro')[0]
+const runMacroElement = document.getElementsByName('run-macro')[0]
+const repeatMacroElement = document.getElementsByName('repeat-macro')[0]
+const macroListElement = document.getElementsByName('macro-list')[0]
+const pianoElement = document.querySelector('.piano');
+
+let macro = undefined
+let selected = 0;
+let isMouseDown, isMacroRunning = false;
+const notes = Object.keys(notesSound)
+const allKeys = {}
 
 const keys = [
     "Z", "S", "X", "D", "C", "V", "G", "B", "H", "N", "J", "M", ",", "L", ".", "Ç", ";",
     "Q", "2", "W", "3", "E", "4", "R", "T", "6", "Y", "7", "U", "I", "9", "O", "0", "P", "-", 'DEAD'
 ];
-
-const notes = Object.keys(notesSound)
-
+const end = notes.length
+const final = end - keys.length
 const keysOffset = {
     "Tab": -100,
     "CapsLock": 100,
@@ -36,29 +56,9 @@ const keysOffset = {
     "ControlLeft": 12
 }
 
-let selected = 0;
-const final = notes.length;
 
-const pianoElement = document.querySelector('.piano');
-let isMouseDown = false;
+main()
 
-function updateLabels(index) {
-    const labels = document.querySelectorAll('.key-label');
-
-    const keysButton = document.querySelectorAll('.key');
-    document.querySelectorAll('.selected').forEach(item => {
-        item.classList.remove('selected')
-    });
-
-    for (let i = 0; i < notes.length; i++) {
-        labels[i].innerText = notes[i];
-    }
-    
-    for (let i = 0; i < keys.length; i++) {
-        labels[index + i].innerText = keys[i] !== "DEAD" ? keys[i] : "´";
-        keysButton[index + i].classList.add('selected');
-    }
-}
 function playNote(note) {
     const audio = new Audio(note);
     audio.play();
@@ -66,50 +66,67 @@ function playNote(note) {
 function activateKey(note, key) {
     playNote(notesSound[note]);
     key.classList.add('active');
+    if (macroElement.checked) {
+        macro(note)
+    }
 }
 function deactivateKey(key) {
     key.classList.remove('active');
 }
+function enableMacro() {
+    let oldTime = 0;
+    let text = ""
+    return function(note){
+        const date = Date.now();
+        let delay = date - oldTime;
 
-notes.forEach(note => {
-    const key = document.createElement('div');
-    key.classList.add('key');
-    key.dataset.note = note;
-    key.classList.add(note.length === 3 ? 'black': 'white')
-
-    const label = document.createElement('div');
-    label.classList.add('key-label');
-    label.innerText = note;
-    key.appendChild(label);
-
-    if (note.includes('#')) {
-        key.classList.add('black');
+        text += `${note}, ${delay}\n`;
+        macroListElement.value = text
+        oldTime = date;
     }
+}
+async function runMacro() {
+    console.log('running macro')
+    isMacroRunning = true
+    let text = macroListElement.value.split('\n')
+    text.pop()
+    
+    for (let noteDelay of text) {
+        const [note, delay] = noteDelay.split(', ')
 
-    key.addEventListener('mousedown', _ => {
-        isMouseDown = true;
-        activateKey(note, key);
-    });
+        await activateKeyMacro(note, Number(delay))
+    }
+    isMacroRunning = false
+}
+async function activateKeyMacro(note, delay) {
+    allKeys[note].classList.add('active-macro')
+    await sleep(delay)
+    let e = new Event('mousedown')
+    allKeys[note].dispatchEvent(e)
+    e = new Event('mouseup')
+    allKeys[note].dispatchEvent(e)
+    allKeys[note].classList.remove('active-macro')
+}
 
-    key.addEventListener('mouseup', event => {
-        isMouseDown = false;
-        deactivateKey(event.target)
-    });
-
-    key.addEventListener('mousemove', event => {
-        if (isMouseDown && event.target === key) {
-            if (!key.classList.contains('active')) {
-                activateKey(note, key);
-            }
+macroElement.addEventListener('change', event => {
+    if (event.srcElement.checked) {
+        macro = enableMacro()
+    }
+})
+runMacroElement.addEventListener('change', async event => {
+    if (event.srcElement.checked) {
+        await runMacro();
+        event.srcElement.checked = false
+    }
+})
+repeatMacroElement.addEventListener('change', async event => {
+    if (!macroListElement.value.length) return;
+    if (event.srcElement.checked) {
+        while (event.srcElement.checked) {
+            await runMacro();
         }
-    });
-
-    key.addEventListener('mouseleave', event => {
-        deactivateKey(event.target);
-    });
-
-    pianoElement.appendChild(key);
-});
+    }
+})
 
 window.addEventListener('keydown', event => {
     let keyPressed = event.key.toUpperCase();
@@ -123,14 +140,16 @@ window.addEventListener('keydown', event => {
         }
     }
     keyPressed = event.code;
+    let oldSelected = 0;
     if (keysOffset[keyPressed] !== undefined) {
+        oldSelected = selected;
         selected += keysOffset[keyPressed];
         if (selected < 0) selected = 0;
-        else if (selected > final - keys.length) {
-            selected = final - keys.length;
+        else if (selected > final) {
+            selected = final;
         }
 
-        updateLabels(selected);
+        updateLabels(oldSelected, selected);
     }
 })
 window.addEventListener('keyup', event => {
@@ -145,8 +164,77 @@ window.addEventListener('keyup', event => {
         }
     }
 });
+window.addEventListener('mouseup', event => {
+    isMouseDown = false;
+});
 
-updateLabels(selected);
+function sleep(delay) {
+    return new Promise(resolve => setTimeout(resolve, delay))
+}
+function removeSelected() {
+    document.querySelectorAll('.selected').forEach(item => {
+        item.classList.remove('selected')
+    });
+}
+function paintLabels() {
+    const keysButton = document.querySelectorAll('.key');
+    for (let i = 0; i < end; i++) {
+        keysButton[i].innerText = notes[i];
+    }
+}
+function updateLabels(oldSelected, index) {
+    removeSelected();
+    if (index === undefined) index = 0
+    const keysButton = document.querySelectorAll('.key');
+
+    for (let i = oldSelected; i < index; i++) {
+        keysButton[i].innerText = notes[i];
+    }
+    for (let i = index; i < end; i++) {
+        keysButton[i].innerText = notes[i];
+    }
+    
+    for (let i = 0; i < keys.length; i++) {
+        keysButton[index + i].innerText = keys[i] !== "DEAD" ? keys[i] : "´";
+        keysButton[index + i].classList.add('selected');
+    }
+}
+function main() {
+    notes.forEach(note => {
+        const key = document.createElement('div');
+        key.classList.add('key');
+        key.dataset.note = note;
+        key.classList.add(note.length === 3 ? 'black': 'white')
+
+        if (note.includes('#')) {
+            key.classList.add('black');
+        }
+        key.addEventListener('mouseup', event => {
+            isMouseDown = false;
+            deactivateKey(event.target)
+        });
+        key.addEventListener('mousedown', _ => {
+            isMouseDown = true;
+            activateKey(note, key);
+        });
+        key.addEventListener('mousemove', event => {
+            if (!isMacroRunning && isMouseDown && event.target === key) {
+                if (!key.classList.contains('active')) {
+                    activateKey(note, key);
+                }
+            }
+        });
+        key.addEventListener('mouseleave', event => {
+            deactivateKey(event.target);
+        });
+
+        pianoElement.appendChild(key);
+        allKeys[note] = key 
+    });
+    
+    paintLabels();
+    updateLabels(selected)
+}
         </script>
     </body>
 </html>

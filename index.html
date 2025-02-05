@@ -20,16 +20,18 @@
                     </div>
                 </div>
                 <div class="macro">
-                    <label><input type="checkbox" name="enable-macro">Enable Macro Record</label>
-                    <label><input type="checkbox" name="run-macro">Run Macro</label>
-                    <label><input type="checkbox" name="repeat-macro">Repeat Macro</label>
-                    <textarea name="macro-list" id=""></textarea>
+                    <div><label><input type="checkbox" name="enable-macro">Enable Macro Record</label></div>
+                    <div><label><input type="checkbox" name="run-macro">Run Macro</label></div>
+                    <div><label><input type="checkbox" name="repeat-macro">Repeat Macro</label></div>
+                    <div><textarea name="macro-list"></textarea></div>
+                    <div class="error-piano-macro"></div>
                 </div>
                 <div class="piano"></div>
             </div>
         </section>
         <script type="module">
 import { notesSound } from './soundfonts/acoustic_grand_piano_trimmed-ogg.js'
+import { NoteParser } from './js/noteparser.js'
 
 const macroElement = document.getElementsByName('enable-macro')[0]
 const runMacroElement = document.getElementsByName('run-macro')[0]
@@ -38,6 +40,7 @@ const macroListElement = document.getElementsByName('macro-list')[0]
 const pianoElement = document.querySelector('.piano');
 
 let macro = undefined
+let textMacro = ""
 let selected = 0;
 let isMouseDown, isMacroRunning = false;
 const notes = Object.keys(notesSound)
@@ -55,7 +58,6 @@ const keysOffset = {
     "ShiftLeft": -12,
     "ControlLeft": 12
 }
-
 
 main()
 
@@ -78,9 +80,9 @@ function enableMacro() {
     let text = ""
     return function(note){
         const date = Date.now();
-        let delay = date - oldTime;
+        let delay = oldTime === 0 ? 0 : date - oldTime;
 
-        text += `${note}, ${delay}\n`;
+        text += `${note},${delay} `;
         macroListElement.value = text
         oldTime = date;
     }
@@ -88,11 +90,8 @@ function enableMacro() {
 async function runMacro() {
     console.log('running macro')
     isMacroRunning = true
-    let text = macroListElement.value.split('\n')
-    text.pop()
-    
-    for (let noteDelay of text) {
-        const [note, delay] = noteDelay.split(', ')
+    for (let noteDelay of textMacro) {
+        const [note, delay] = noteDelay.split(',')
 
         await activateKeyMacro(note, Number(delay))
     }
@@ -108,23 +107,45 @@ async function activateKeyMacro(note, delay) {
     allKeys[note].classList.remove('active-macro')
 }
 
-macroElement.addEventListener('change', event => {
-    if (event.srcElement.checked) {
-        macro = enableMacro()
-    }
-})
-runMacroElement.addEventListener('change', async event => {
-    if (event.srcElement.checked) {
-        await runMacro();
-        event.srcElement.checked = false
-    }
-})
-repeatMacroElement.addEventListener('change', async event => {
-    if (!macroListElement.value.length) return;
-    if (event.srcElement.checked) {
-        while (event.srcElement.checked) {
-            await runMacro();
+window.addEventListener('change', async event => {
+    const target = event.target
+    if (target === macroElement) {
+        if (macroElement.checked) {
+            macro = enableMacro()
         }
+    } else if (target === runMacroElement || target === repeatMacroElement) {
+        const error = document.querySelector('.error-piano-macro')
+        error.innerText = ""
+        if (!target.checked) {
+            console.log('obrigado por ter tocado uma música')
+            return;
+        }
+        macroElement.checked = false
+        const noteParser = new NoteParser();
+        let text = macroListElement.value.replace(/\s+/g, ' ').trim().split(' ')
+        for (let notems of text) {
+            noteParser.parse(notems)
+        }
+
+        if (!!noteParser.error.length) {
+            error.innerText = noteParser.error
+            runMacroElement.checked = false
+            macroElement.checked = false
+            return
+        } else {
+            textMacro = text
+            macroListElement.value = macroListElement.value.replace(/\s+/g, ' ').trim()
+        }
+
+        if (runMacroElement.checked) {
+            await runMacro()
+        } else {
+            while (repeatMacroElement.checked) {
+                await runMacro();
+                await sleep(500)
+            }
+        }
+        target.checked = false;
     }
 })
 

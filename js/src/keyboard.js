@@ -18,7 +18,6 @@ export class Keyboard {
         window.addEventListener('keyup', this.handleKeyUp.bind(this))
     }
     handleKeyDown(event) {
-        event.preventDefault();
         let keyPressed = event.key.toUpperCase();
         let index = this.keys.indexOf(keyPressed);
         if (index !== -1) {

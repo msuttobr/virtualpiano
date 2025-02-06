@@ -1,9 +1,7 @@
-
 export class Note {
-    constructor(noteSong) {
-        const [note, song] = noteSong;
-        this.note = note
-        this.song = song
+    constructor(note) {
+        this.note = note[0]
+        this.song = note[1]
         this.key = undefined
     }
     init() {
@@ -17,10 +15,6 @@ export class Note {
         if (this.note.includes('#')) {
             key.classList.add('black')
         }
-        
-        key.playNote = () => {
-            this.playNote()
-        };
         
         key.addEventListener('mouseup', _ => {
             this.desactivateKey()

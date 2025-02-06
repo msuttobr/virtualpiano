@@ -63,6 +63,11 @@ textarea {
         z-index: 1;
     }
 
+    
+    & .white.active {
+        translate: 0px -3px;
+        transform: scale(0.97);
+    }
     & .black {
         background-color: black;
         color: white;

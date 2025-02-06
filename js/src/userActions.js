@@ -2,21 +2,11 @@ import { NoteParser } from '../utils/noteParser.js'
 import sleep from '../utils/sleep.js'
 
 export class UserActions {
-    constructor(piano, macro, ui, keys) {
+    constructor(piano, macro, keys, notesLength) {
         this.piano = piano
         this.macro = macro
-        this.ui = ui
         this.keys = keys
-        this.keysOffset = {
-            "Tab": -100,
-            "CapsLock": 100,
-            "ShiftLeft": -12,
-            "ControlLeft": 12
-        }
-        this.selected = 0;
         this.isMouseDown = false;
-        this.end = piano.notes.length
-        this.final = this.end - this.keys.length
 
         this.macroElement = document.getElementsByName('enable-macro')[0]
         this.runMacroElement = document.getElementsByName('run-macro')[0]
@@ -33,8 +23,6 @@ export class UserActions {
         window.addEventListener('mousedown', this.handleMouseDown.bind(this))
         window.addEventListener('mousemove', this.handleMouseMove.bind(this))
         window.addEventListener('change', this.handleChange.bind(this))
-        window.addEventListener('keydown', this.handleKeyDown.bind(this))
-        window.addEventListener('keyup', this.handleKeyUp.bind(this))
     }
 
     handleMouseUp() {
@@ -45,10 +33,10 @@ export class UserActions {
         if (this.isMouseDown) {
             const target = event.target
             if (!target.classList.contains('key')) return
-            const note = this.piano.notes.find(note => note.key === target)
-            if (!note.key.classList.contains('active')) {
-                this.activateKey(note)
-            }
+            const dataset = target.dataset.note
+            const note = this.piano.notes[dataset];
+            if (target.classList.contains('active')) return
+            this.activateKey(note)
         }
     }
     handleMouseMove(event) {
@@ -56,9 +44,8 @@ export class UserActions {
             const target = event.target
             if (!target.classList.contains('key')) return
             
-            const note = this.piano.notes.find(note => note.key === target)
-            if (!note.key.classList.contains('active')) {
-                this.activateKey(note)
+            if (!target.classList.contains('active')) {
+                this.activateKey(this.piano.notes[target.dataset.note])
             }
         }
     }
@@ -76,59 +63,12 @@ export class UserActions {
             return this.handleRunOrRepeatMacroChange(target);
         }
     }
-    handleKeyDown(event) {
-        let keyPressed = event.key.toUpperCase();
-        let index = this.keys.indexOf(keyPressed);
-
-        if (index !== -1) {
-            const note = this.piano.notes[this.selected + index].note;
-            const key = this.pianoElement.querySelector(`[data-note="${note}"]`);
-            if (key && !key.classList.contains('active')) {
-                this.activateKey(this.piano.notes[this.selected + index])
-            }
-        }
-        keyPressed = event.code;
-        if (this.keysOffset[keyPressed] === undefined) {
-            return;
-        }
-        let oldSelected = this.selected;
-        this.selected += this.keysOffset[keyPressed];
-        if (this.selected < 0) {
-            this.selected = 0
-        } else if (this.selected > this.final) {
-            this.selected = this.final
-        }
-
-        this.ui.updateOctaves(oldSelected, this.selected)
-    }
-    handleKeyUp(event) {
-        const keyPressed = event.key.toUpperCase()
-        const index = this.keys.indexOf(keyPressed)
-
-        if (index === -1) {
-            return
-        }
-        const note = this.piano.notes[this.selected + index].note
-        const key = this.pianoElement.querySelector(`[data-note="${note}"]`)
-        if (key && key.classList.contains('active')) {
-            this.piano.notes[this.selected + index].desactivateKey()
-        }
-    }
-
-    activateKey(note) {
-        note.activateKey()
-        if (this.macro.isMacroEnabled) {
-            this.macro.macro(note)
-        }
-    }
-
     handleMacroElementChange() {
         this.macro.isMacroEnabled = this.macroElement.checked;
         if (this.macroElement.checked) {
             this.macro.macro = this.macro.enableMacro();
         }
     }
-
     async handleRunOrRepeatMacroChange(target) {
         const error = document.querySelector('.error-piano-macro');
         
@@ -169,12 +109,17 @@ export class UserActions {
                 await sleep(500);
             }
         }
-    
         target.checked = false;
     }
-    
     resetMacroElements() {
         this.runMacroElement.checked = false;
         this.macroElement.checked = false;
+    }
+    
+    activateKey(note) {
+        note.activateKey()
+        if (this.macro.isMacroEnabled) {
+            this.macro.macro(note)
+        }
     }
 }

@@ -1,11 +1,15 @@
 import { notesSound } from '../../soundfonts/acoustic_grand_piano_trimmed-ogg.js'
+import { Note } from './note.js'
 
 export class Piano {
     constructor() {
-        this.notes = Object.keys(notesSound);
+        this.notes = Object.entries(notesSound).map(note => {
+            return new Note(note);
+        })
     }
-    playNote(note) {
-        const audio = new Audio(notesSound[note]);
-        audio.play();
+    init() {
+        this.notes.forEach(note => {
+            note.init()
+        })
     }
 }

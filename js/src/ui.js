@@ -9,40 +9,31 @@ export class UI {
     }
     init() {
         this.octaves = document.querySelectorAll('.key')
-        this.keySelected = document.querySelectorAll('.selected')
-        this.keysButton = document.querySelectorAll('.key')
+        this.displayOctaves()
+        this.updateOctaves(0, 0)
     }
     displayOctaves() {
         for (let i = 0; i < this.end; i++) {
-            this.octaves[i].innerText = this.piano.notes[i]
+            this.octaves[i].innerText = this.piano.notes[i].note
         }
     }
     removeKeySelected() {
-        this.keySelected.forEach(key => {
+        document.querySelectorAll('.selected').forEach(key => {
             key.classList.remove('selected')
         });
     }
     updateOctaves(oldSelected, index) {
         this.removeKeySelected();
-    
         for (let i = oldSelected; i < index; i++) {
-            this.keysButton[i].innerText = this.piano.notes[i];
+            this.octaves[i].innerText = this.piano.notes[i].note;
         }
-        for (let i = index; i < this.end; i++) {
-            this.keysButton[i].innerText = this.piano.notes[i];
+        for (let i = index + this.keys.length; i < this.end; i++) {
+            this.octaves[i].innerText = this.piano.notes[i].note;
         }
-        
+
         for (let i = 0; i < this.keys.length; i++) {
-            this.keysButton[index + i].innerText = this.keys[i] !== "DEAD" ? this.keys[i] : "´";
-            this.keysButton[index + i].classList.add('selected');
+            this.octaves[index + i].innerText = this.keys[i] !== "DEAD" ? this.keys[i] : "´";
+            this.octaves[index + i].classList.add('selected');
         }
-    }
-    
-    activateKey(note, key) {
-        this.piano.playNote(note);
-        key.classList.add('active');
-    }
-    deactivateKey(key) {
-        key.classList.remove('active');
     }
 }

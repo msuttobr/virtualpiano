@@ -7,8 +7,14 @@ export class Macro {
         this.textMacro = '';
         this.allKeys = {};
         this.macro = undefined;
+        this.isMacroEnabled = false;
         this.isMacroRunning = false;
         this.macroListElement = document.getElementsByName('macro-list')[0]
+    }
+    init() {
+        this.piano.notes.forEach(note => {
+            this.allKeys[note.note] = note.key
+        });
     }
     enableMacro() {
         let oldTime = 0;
@@ -17,7 +23,7 @@ export class Macro {
             const date = Date.now();
             let delay = oldTime === 0 ? 0 : date - oldTime;
 
-            text += `${note},${delay} `;
+            text += `${note.note},${delay} `;
             this.macroListElement.value = text;
             oldTime = date;
         };
@@ -32,12 +38,10 @@ export class Macro {
         this.isMacroRunning = false;
     }
     async activateKeyMacro(note, delay) {
-        this.allKeys[note].classList.add('active-macro');
+        const keyElement = this.allKeys[note];
+        keyElement.classList.add('active-macro');
         await sleep(delay);
-        let e = new Event('mousedown');
-        this.allKeys[note].dispatchEvent(e);
-        e = new Event('mouseup');
-        this.allKeys[note].dispatchEvent(e);
-        this.allKeys[note].classList.remove('active-macro');
+        keyElement.playNote()
+        keyElement.classList.remove('active-macro');
     }
 }

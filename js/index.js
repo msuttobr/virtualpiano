@@ -2,7 +2,7 @@ import { Piano } from './src/piano.js'
 import { Macro } from './src/macro.js'
 import { UserActions } from './src/userActions.js'
 import { Keyboard } from './src/keyboard.js'
-import { notesSound } from '../../soundfonts/acoustic_grand_piano_trimmed-ogg.js'
+import { notesSound } from '../soundfonts/acoustic_grand_piano_trimmed-ogg.js'
 
 const keys = [
     "Z", "S", "X", "D", "C", "V", "G", "B", "H", "N", "J", "M", ",", "L", ".", "Ç", ";",

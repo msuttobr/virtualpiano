@@ -5,7 +5,6 @@ export class Note {
         this.key = undefined
     }
     init() {
-        const pianoElement = document.querySelector('.piano')
         const key = document.createElement('div');
         key.classList.add('key')
         key.dataset.note = this.note
@@ -22,8 +21,6 @@ export class Note {
         key.addEventListener('mouseleave', _ => {
             this.desactivateKey()
         })
-        
-        pianoElement.appendChild(key)
     }
     playNote() {
         const audio = new Audio(this.song);

@@ -2,29 +2,33 @@ import { NoteParser } from '../utils/noteParser.js'
 import sleep from '../utils/sleep.js'
 
 export class UserActions {
-    constructor(piano, macro, keys, notesLength) {
+    constructor(piano, macro) {
         this.piano = piano
         this.macro = macro
-        this.keys = keys
         this.isMouseDown = false;
-
+        this.delay = 0;
+        
         this.macroElement = document.getElementsByName('enable-macro')[0]
         this.runMacroElement = document.getElementsByName('run-macro')[0]
         this.repeatMacroElement = document.getElementsByName('repeat-macro')[0]
         this.macroListElement = document.getElementsByName('macro-list')[0]
-        this.pianoElement = document.querySelector('.piano');
-
+        this.delayElement = document.getElementsByName('delay-macro')[0]
     }
     init() {
         this.addEventListener()
     }
     addEventListener() {
+        this.delayElement.addEventListener('input', this.handleInput.bind(this))
+
         window.addEventListener('mouseup', this.handleMouseUp.bind(this))
         window.addEventListener('mousedown', this.handleMouseDown.bind(this))
         window.addEventListener('mousemove', this.handleMouseMove.bind(this))
         window.addEventListener('change', this.handleChange.bind(this))
     }
 
+    handleInput(event) {
+        this.delay = event.target.value
+    }
     handleMouseUp() {
         this.isMouseDown = false
     }
@@ -106,7 +110,7 @@ export class UserActions {
         } else {
             while (this.repeatMacroElement.checked) {
                 await this.macro.runMacro();
-                await sleep(500);
+                await sleep(this.delay);
             }
         }
         target.checked = false;

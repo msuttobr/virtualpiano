@@ -8,8 +8,10 @@ export class Piano {
         }, {});
     }
     init() {
+        const pianoElement = document.querySelector('.piano')
         Object.values(this.notes).forEach(note => {
             note.init()
+            pianoElement.appendChild(note.key)
         })
     }
     

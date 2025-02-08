@@ -10,7 +10,6 @@ const keys = [
 ];
 
 const notes = Object.keys(notesSound)
-const notesLength = notes.length
 
 const keysObj = keys.reduce((key, next, index) => {
     key[next] = notes[index]
@@ -19,7 +18,7 @@ const keysObj = keys.reduce((key, next, index) => {
 
 const piano = new Piano(notesSound);
 const macro = new Macro(piano);
-const userActions = new UserActions(piano, macro, keys, notesLength);
+const userActions = new UserActions(piano, macro);
 const keyboard = new Keyboard(piano, keys, keysObj, notes);
 
 piano.init()

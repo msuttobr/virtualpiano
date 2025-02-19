@@ -1,13 +1,13 @@
 import { Octave } from './octave.js'
 
 export class Keyboard {
-    constructor(piano, keys, keysObj, notes) {
+    constructor(piano, macro, keys, keysObj, notes) {
         this.piano = piano
         this.keys = keys
         this.keysObj = keysObj
         this.notes = notes
         this.end = notes.length
-        this.octave = new Octave(piano, notes, keys, this.end);
+        this.octave = new Octave(piano, macro, notes, keys, this.end);
     }
     init() {
         this.octave.init()
@@ -20,12 +20,12 @@ export class Keyboard {
     handleKeyDown(event) {
         let keyPressed = event.key.toUpperCase();
         let index = this.keys.indexOf(keyPressed);
-        if (index !== -1) {
-            this.octave.activateKey(index)
+        if (index === -1) {
+            keyPressed = event.code
+            this.octave.move(keyPressed)
             return;
         }
-        keyPressed = event.code
-        this.octave.move(keyPressed)
+        this.octave.activateKey(index)
     }
     handleKeyUp(event) {
         const keyPressed = event.key.toUpperCase()

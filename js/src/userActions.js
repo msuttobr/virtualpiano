@@ -34,28 +34,25 @@ export class UserActions {
     }
     handleMouseDown(event) {
         this.isMouseDown = true
-        if (this.isMouseDown) {
-            const target = event.target
-            if (!target.classList.contains('key')) return
-            const dataset = target.dataset.note
-            const note = this.piano.notes[dataset];
-            if (target.classList.contains('active')) return
-            this.activateKey(note)
-        }
+        const target = event.target
+        if (!this.isKey(target)) return
+        const dataset = target.dataset.note
+        const note = this.piano.notes[dataset];
+        if (target.classList.contains('active')) return
+        this.activateKey(note)
     }
     handleMouseMove(event) {
         if (this.isMouseDown) {
             const target = event.target
-            if (!target.classList.contains('key')) return
+            if (!this.isKey(target)) return
             
             if (!target.classList.contains('active')) {
                 this.activateKey(this.piano.notes[target.dataset.note])
             }
         }
     }
-    async handleChange(event) {
+    handleChange(event) {
         const target = event.target
-        
         if (this.repeatMacroElement.checked && target !== this.repeatMacroElement) {
             target.checked = false
             return
@@ -64,6 +61,7 @@ export class UserActions {
             return this.handleMacroElementChange();
         }
         else if (target === this.runMacroElement || target === this.repeatMacroElement) {
+            this.macro.run = target.checked;
             return this.handleRunOrRepeatMacroChange(target);
         }
     }
@@ -103,23 +101,33 @@ export class UserActions {
         }
     
         this.macro.textMacro = text;
+        this.macro.notes = this.textToNotes(text);
         this.macroListElement.value = this.macroListElement.value.replace(/\s+/g, ' ').trim();
     
-        if (this.runMacroElement.checked) {
+        do {
             await this.macro.runMacro();
-        } else {
-            while (this.repeatMacroElement.checked) {
-                await this.macro.runMacro();
-                await sleep(this.delay);
-            }
-        }
+            await sleep(this.delay);
+        } while (this.repeatMacroElement.checked);
         target.checked = false;
     }
     resetMacroElements() {
         this.runMacroElement.checked = false;
         this.macroElement.checked = false;
     }
-    
+    textToNotes(text) {
+        const notes = []
+        for (const noteDelay of text) {
+            const [note, delay] = noteDelay.split(',')
+            notes.push({
+                note: this.piano.notes[note],
+                delay: delay,
+            })
+        }
+        return notes
+    }
+    isKey(target) {
+        return target.classList.contains('key')
+    }
     activateKey(note) {
         note.activateKey()
         if (this.macro.isMacroEnabled) {

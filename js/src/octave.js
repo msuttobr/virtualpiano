@@ -1,6 +1,7 @@
 export class Octave {
-    constructor(piano, notes, keys, end) {
+    constructor(piano, macro, notes, keys, end) {
         this.piano = piano
+        this.macro = macro
         this.notes = notes
         this.keys = keys
         this.end = end
@@ -63,6 +64,9 @@ export class Octave {
         const note = this.piano.notes[this.notes[index + this.selected]]
         if (note.key.classList.contains('active')) return
         note.activateKey()
+        if (this.macro.isMacroEnabled) {
+            this.macro.macro(note)
+        }
     }
     desactivateKey(index) {
         this.piano.notes[this.notes[index + this.selected]].desactivateKey()

@@ -1,36 +1,52 @@
 import sleep from '../utils/sleep.js'
 
 export class Macro {
-    constructor(piano) {
-        this.piano = piano
+    constructor() {
+        this.notes = []
         this.textMacro = '';
         this.macro = undefined;
+        this.isMacroEnabled = false;
+        this.run = false;
         this.macroListElement = document.getElementsByName('macro-list')[0]
     }
     enableMacro() {
         let oldTime = 0;
         let text = '';
+        this.notes = [];
         return function (note) {
             const date = Date.now();
             let delay = oldTime === 0 ? 0 : date - oldTime;
 
+            const noteDelay = {
+                note: note,
+                delay: delay,
+            };
+            this.notes.push(noteDelay);
             text += `${note.note},${delay} `;
             this.macroListElement.value = text;
             oldTime = date;
         };
     }
     async runMacro() {
-        console.log('running macro');
-        for (let noteDelay of this.textMacro) {
-            const [note, delay] = noteDelay.split(',');
-            await this.activateKeyMacro(note, Number(delay));
+        console.log('running macro')
+        let noteObj = null;
+        for (const noteDelay of this.notes) {
+            if (!this.run) break;
+            console.log(noteDelay)
+            noteObj = await this.activateKeyMacro(noteDelay, noteObj)
         }
+        await sleep(noteObj.delay);
+        noteObj.note.key.classList.remove('active-macro');
     }
-    async activateKeyMacro(note, delay) {
-        const noteElem = this.piano.notes[note]
+    async activateKeyMacro(note, noteObj) {
+        if (noteObj) {
+            noteObj.note.key.classList.remove('active-macro');
+        }
+        const noteElem = note.note
+        console.log(`key: ${noteElem.key.textContent} - note: ${noteElem.key.dataset.note} - delay: ${note.delay}`);
         noteElem.key.classList.add('active-macro');
-        await sleep(delay);
-        noteElem.playNote()
-        noteElem.key.classList.remove('active-macro');
+        noteElem.playNote();
+        await sleep(note.delay);
+        return note
     }
 }

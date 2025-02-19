@@ -9,18 +9,11 @@ export class Note {
         key.classList.add('key')
         key.dataset.note = this.note
         key.classList.add(this.note.length === 3 ? 'black': 'white')
-        this.key = key;
 
         if (this.note.includes('#')) {
             key.classList.add('black')
         }
-        
-        key.addEventListener('mouseup', _ => {
-            this.desactivateKey()
-        })
-        key.addEventListener('mouseleave', _ => {
-            this.desactivateKey()
-        })
+        this.key = key;
     }
     playNote() {
         const audio = new Audio(this.song);

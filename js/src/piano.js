@@ -9,10 +9,21 @@ export class Piano {
     }
     init() {
         const pianoElement = document.querySelector('.piano')
+        pianoElement.addEventListener('mouseup', event => {
+            const note = event.target.dataset.note;
+            if (note && this.notes[note]) {
+                this.notes[event.target.dataset.note].desactivateKey()
+            }
+        })
+        pianoElement.addEventListener('mouseleave', event => {
+            const note = event.target.dataset.note;
+            if (note && this.notes[note]) {
+                this.notes[note].desactivateKey();
+            }
+        }, true);
         Object.values(this.notes).forEach(note => {
             note.init()
             pianoElement.appendChild(note.key)
         })
     }
-    
 }

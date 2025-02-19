@@ -17,9 +17,9 @@ const keysObj = keys.reduce((key, next, index) => {
 }, {})
 
 const piano = new Piano(notesSound);
-const macro = new Macro(piano);
+const macro = new Macro();
 const userActions = new UserActions(piano, macro);
-const keyboard = new Keyboard(piano, keys, keysObj, notes);
+const keyboard = new Keyboard(piano, macro, keys, keysObj, notes);
 
 piano.init()
 userActions.init()

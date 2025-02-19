@@ -39,14 +39,12 @@ export class Macro {
         noteObj.note.key.classList.remove('active-macro');
     }
     async activateKeyMacro(note, noteObj) {
-        if (noteObj) {
-            noteObj.note.key.classList.remove('active-macro');
-        }
         const noteElem = note.note
         console.log(`key: ${noteElem.key.textContent} - note: ${noteElem.key.dataset.note} - delay: ${note.delay}`);
-        noteElem.key.classList.add('active-macro');
-        noteElem.playNote();
         await sleep(note.delay);
+        if (noteObj) noteObj.note.key.classList.remove('active-macro');
+        noteElem.playNote();
+        noteElem.key.classList.add('active-macro');
         return note
     }
 }

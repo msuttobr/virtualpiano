@@ -32,7 +32,6 @@ export class Macro {
         let noteObj = null;
         for (const noteDelay of this.notes) {
             if (!this.run) break;
-            console.log(noteDelay)
             noteObj = await this.activateKeyMacro(noteDelay, noteObj)
         }
         await sleep(noteObj.delay);

@@ -1,35 +1,48 @@
 <!DOCTYPE html>
 <html lang="pt-br">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <meta name="description"
-            content="Toque suas músicas favoritas com o Piano Virtual. Uma experiência de piano online completa.">
-        <title>Piano Virtual</title>
-        <link rel="stylesheet" href="css/style.css">
-        <script defer src="./js/index.js" type="module"></script>
-    </head>
-    <body>
-        <section class="instruments">
-            <div class="container">
-                <div class="instruments-info">
-                    <div class="description">
-                        Utilize <kbd>Tab</kbd> para primeira oitava<br>
-                        Utilize <kbd>CapsLock</kbd> para última oitava<br>
-                        Utilize <kbd>ShiftLeft</kbd> para recuar a oitava<br>
-                        Utilize <kbd>ControlLeft</kbd> para avançar a oitava
-                    </div>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description"
+        content="Toque suas músicas favoritas com o Piano Virtual. Uma experiência de piano online completa.">
+    <title>Piano Virtual</title>
+    <link rel="stylesheet" href="css/style.css">
+    <script defer src="./js/index.js" type="module"></script>
+</head>
+
+<body>
+    <section class="instruments">
+        <div class="container">
+            <div class="instruments-info">
+                <div class="description">
+                    Utilize <kbd>Tab</kbd> para primeira oitava<br>
+                    Utilize <kbd>CapsLock</kbd> para última oitava<br>
+                    Utilize <kbd>ShiftLeft</kbd> para recuar a oitava<br>
+                    Utilize <kbd>ControlLeft</kbd> para avançar a oitava
                 </div>
-                <div class="macro">
+            </div>
+            <div class="macro">
+                <div class="macro-options">
                     <div><label><input type="checkbox" name="enable-macro">Enable Macro Record</label></div>
                     <div><label><input type="checkbox" name="run-macro">Run Macro</label></div>
                     <div><label><input type="checkbox" name="repeat-macro">Repeat Macro</label></div>
-                    <div><label>MS Repeat<input type="number" name="delay-macro" min="0"></label></div>
+                    <div><label>MS Repeat<input type="number" name="delay-macro" min="0" placeholder="0"></label></div>
                     <div><textarea name="macro-list"></textarea></div>
                     <div class="error-piano-macro"></div>
                 </div>
-                <div class="piano"></div>
+                <div class="macro-description">
+                    <p>Caso queira gravar uma macro, clique em Enable Macro Record para definir a sua macro-list.</p><br>
+                    <p>Caso queira reproduzir uma macro-list, clique em Run Macro.</p><br>
+                    <p>Caso queira reproduzir uma macro-list em modo repetição, clique em Repeat Macro.</p><br>
+                    <p>Caso queira definir um atraso entre repetições, insira o número na caixa de MS Repeat.</p><br>
+                    <p>1000 representa 1 segundo de atraso entre cada repetição</p>
+                    <p>100 representa 0.1 segundos de atraso entre cada repetição</p>
+                </div>
             </div>
-        </section>
-    </body>
+            <div class="piano"></div>
+        </div>
+    </section>
+</body>
+
 </html>
